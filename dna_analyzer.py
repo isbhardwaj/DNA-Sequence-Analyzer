@@ -1,9 +1,9 @@
 import os
+import streamlit as st
 import matplotlib.pyplot as plt
 from collections import Counter
 from Bio.Seq import Seq
 from Bio import SeqIO
-import streamlit as st
 
 def calculate_gc_content(dna_sequence):
     """Calculate the GC content of a DNA sequence"""
@@ -19,10 +19,20 @@ def transcribe_dna(dna_sequence):
     return dna_sequence.replace('T', 'U')
 
 def plot_nucleotide_frequencies(frequencies):
+    """Plot a bar graph of nucleotide frequencies."""
+    fig, ax = plt.subplots()
+    ax.bar(frequencies.keys(), frequencies.values(), color=['blue', 'red', 'green', 'yellow'])
+    ax.set_xlabel('Nucleotides')
+    ax.set_ylabel('Frequency')
+    ax.set_title('Nucleotide Frequency in DNA Sequence')
+    st.pyplot(fig)
+
+def plot_nucleotide_pie(frequencies):
     """Plot pie chart of nucleotide composition"""
-    plt.pie(frequencies.values(), labels=frequencies.keys(), autopct='%1.1f%%', startangle=140)
-    plt.title("Nucleotide Composition")
-    plt.show()
+    fig, ax = plt.subplots()
+    ax.pie(frequencies.values(), labels=frequencies.keys(), autopct='%1.1f%%', startangle=140)
+    ax.set_title("Nucleotide Composition")
+    st.pyplot(fig)
 
 def read_fasta(file_path):
     """Read a DNA sequence from a FASTA file"""
@@ -49,6 +59,7 @@ def find_orfs(dna_sequence):
 def reverse_complement(dna_sequence):
     """Generate the reverse complement of a DNA sequence"""
     complement = {"A": "T", "T": "A", "G": "C", "C": "G"}
+    cleaned_sequence = dna_sequence.strip().replace("\n", "").replace(" ", "")
     return "".join(complement[base] for base in reversed(dna_sequence))
 
 def translate_dna(dna_sequence):
@@ -57,41 +68,38 @@ def translate_dna(dna_sequence):
 
 
 def main():
-    choice = input("Do you want to enter a sequence manually (M) or use a FASTA file (F)? ").upper()
+    st.title("DNA Sequence Analyzer")
+    st.write("Upload a FASTA file or enter a DNA sequence below.")
 
-    if choice == "F":
-        file_path = input("enter the path to the FASTA file: ").strip()
-        if os.path.exists(file_path):
-            dna_sequence = read_fasta(file_path)
-            print(f"Loaded sequence: {dna_sequence}")
-        else:
-            print("Error: File not found.")
-            return
-    elif choice == "M":
-        dna_sequence = input("Enter a DNA sequence: ").upper()
+    uploaded_file = st.file_uploader("Upload a FASTA file", type=["fasta"])
+    dna_sequence = ""
+
+    if uploaded_file is not None:
+        dna_sequence = read_fasta(uploaded_file)
+        st.write(f"Loaded sequence: {dna_sequence[:50]}")
     else:
-        print("Invalid option. Exiting.")
-        return
+        dna_sequence = st.text_area("Or enter a DNA sequence: ").strip().upper()
+
+    if dna_sequence:
+        st.write(f"GC Content: {calculate_gc_content(dna_sequence)}%")
+        frequencies = count_nucleotide_frequencies(dna_sequence)
+        st.write("Nucleotide Frequencies: ", frequencies)
+        st.write("Transcribed mRNA:", transcribe_dna(dna_sequence))
 
 
-    print(f"\nGC Content: {calculate_gc_content(dna_sequence)}%")
+        orfs = find_orfs(dna_sequence)
+        st.write("Open Reading Frames (ORFs): ")
+        for idx, orf in enumerate(orfs, 1):
+            st.write(f"ORF {idx}: {orf}")
 
-    frequencies = count_nucleotide_frequencies(dna_sequence)
-    print("\nNucleotide Frequencies: ", frequencies)
+        dna_sequence = dna_sequence.strip().replace("\n", "").replace(" ", "")
 
-    print("\nTranscribed mRNA:", transcribe_dna(dna_sequence))
+        st.write("Reverse Complement: ", reverse_complement(dna_sequence))
 
+        st.write("Amino Acid Translation: ", translate_dna(dna_sequence))
 
-    orfs = find_orfs(dna_sequence)
-    print("Open Reading Frames (ORFs): ")
-    for idx, orf in enumerate(orfs, 1):
-        print(f"ORF {idx}: {orf}")
-
-    print("Reverse Complement: ", reverse_complement(dna_sequence))
-
-    print("Amino Acid Translation: ", translate_dna(dna_sequence))
-
-    plot_nucleotide_frequencies(frequencies)
+        plot_nucleotide_frequencies(frequencies)
+        plot_nucleotide_pie(frequencies)
 
 
 
