@@ -1,4 +1,5 @@
 import os
+import unittest
 import streamlit as st
 import matplotlib.pyplot as plt
 from collections import Counter
@@ -7,16 +8,19 @@ from Bio import SeqIO
 
 def calculate_gc_content(dna_sequence):
     """Calculate the GC content of a DNA sequence"""
-    gc_count = dna_sequence.count('G') + dna_sequence.count('C')
-    return round((gc_count / len(dna_sequence)) * 100, 2)
+    cleaned_sequence = dna_sequence.strip().replace("\n", "").replace(" ", "")
+    gc_count = cleaned_sequence.count('G') + cleaned_sequence.count('C')
+    return round((gc_count / len(dna_sequence)) * 100, 2) if cleaned_sequence else 0
 
 def count_nucleotide_frequencies(dna_sequence):
     """Count the occurences of each nucleotide in the sequence"""
-    return Counter(dna_sequence)
+    cleaned_sequence = dna_sequence.strip().replace("\n", "").replace(" ", "")
+    return Counter(cleaned_sequence)
 
 def transcribe_dna(dna_sequence):
     """Transcribe DNA to mRNA by replacing Tymine (T) with Uracil (U)"""
-    return dna_sequence.replace('T', 'U')
+    cleaned_sequence = dna_sequence.strip().replace("\n", "").replace(" ", "")
+    return cleaned_sequence.replace('T', 'U')
 
 def plot_nucleotide_frequencies(frequencies):
     """Plot a bar graph of nucleotide frequencies."""
@@ -45,14 +49,15 @@ def find_orfs(dna_sequence):
     start_codon = "ATG"
     stop_codons = {"TAA", "TAG", "TGA"}
     orfs = []
+    cleaned_sequence = dna_sequence.strip().replace("\n", "").replace(" ", "")
 
-    for i in range(len(dna_sequence) - 2):
-        codon = dna_sequence[i:i+3]
+    for i in range(len(cleaned_sequence) - 2):
+        codon = cleaned_sequence[i:i+3]
         if codon == start_codon:
-            for j in range(i, len(dna_sequence) - 2, 3):
-                stop_codon = dna_sequence[j:j+3]
+            for j in range(i, len(cleaned_sequence) - 2, 3):
+                stop_codon = cleaned_sequence[j:j+3]
                 if stop_codon in stop_codons:
-                    orfs.append(dna_sequence[i:j+3])
+                    orfs.append(cleaned_sequence[i:j+3])
                     break
     return orfs
 
@@ -60,11 +65,27 @@ def reverse_complement(dna_sequence):
     """Generate the reverse complement of a DNA sequence"""
     complement = {"A": "T", "T": "A", "G": "C", "C": "G"}
     cleaned_sequence = dna_sequence.strip().replace("\n", "").replace(" ", "")
-    return "".join(complement[base] for base in reversed(dna_sequence))
+    return "".join(complement[base] for base in reversed(cleaned_sequence))
 
 def translate_dna(dna_sequence):
     """Translate DNA sequence into an amino acid sequence."""
-    return str(Seq(dna_sequence).translate())
+    cleaned_sequence = dna_sequence.strip().replace("\n", "").replace(" ", "")
+    return str(Seq(cleaned_sequence).translate())
+
+
+# class TestDataAnalyzer(unittest.TestCase):
+#     def tes_gc_content(self):
+#         self.assertEqual(calculate_gc_content("GCGCGC"), 100.0)
+#         self.assertEqual(calculate_gc_content("ATATAT"), 0.0)
+
+#     def test_transcription(self):
+#         self.assertEqual(transcribe_dna("ATGC"), "AUGC")
+
+#     def test_reverse_complement(self):
+#         self.assertEqual(reverse_complement("ATGC"), "GCAT")
+
+#     def test_translation(self):
+#         self.assertEqual(translate_dna("ATGCGT"), "MR")
 
 
 def main():
