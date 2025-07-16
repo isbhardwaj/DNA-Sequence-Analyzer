@@ -1,9 +1,5 @@
-Here is your complete README.md file content, perfectly formatted for GitHub.
 
 
----
-
-📘 README.md (Copy and paste this into your GitHub repo)
 
 # 🧬 DNA Sequence Analyzer Using Python
 
@@ -25,7 +21,7 @@ To build a Python program that:
 
  Tool        Description                        
 ------------------------------------------------
-🐍 Python       Programming Language               
+🐍 Python        Programming Language               
 VS Code / IDLE   Code Editor (python compiler) 
 GitHub           To host project online           
 
