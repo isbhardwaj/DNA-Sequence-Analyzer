@@ -121,8 +121,8 @@ Publishing to GitHub
 
 Saloni Bhardwaj
 BTech Biotechnology Student
-🔗 GitHub Profile
-🔗 LinkedIn
+🔗 GitHub Profile https://github.com/isbhardwaj/DNA-Sequence-Analyzer/edit/main/README.md
+🔗 LinkedIn https://www.linkedin.com/in/saloni-bhardwaj
 
 
 
